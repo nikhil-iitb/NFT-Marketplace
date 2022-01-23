@@ -1,0 +1,144 @@
+.spacetime {
+    width: auto; /* 146px */
+    height: auto; /* 28px */
+    overflow: visible;
+    white-space: pre;
+    font-weight: 800;
+    font-style: normal;
+    font-family: "Epilogue", serif;
+    color: #3562e9;
+    font-size: 40px;
+    letter-spacing: -1px;
+    line-height: 1;
+    text-align: center;
+    margin-top: 20px;
+  }
+
+.logo-image {
+  width: 150px;
+  height: 122px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#foximage {
+  margin-bottom: 10px;
+}
+
+.form-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
+    margin: 10px
+}
+
+.InputField {
+  background: rgba(0, 102, 255, 0);
+  border: solid rgba(0, 0, 0, 0.1);
+  font-family: Epilogue;
+  font-size: 18px;
+  padding: 10px;
+  color: rgb(0,0,0,);
+  border-width: 2px;
+  margin: 5px;
+  border-radius: 8px;
+}
+
+input:focus {
+  border: solid rgb(0, 68, 255);
+}
+
+::placeholder{
+  color: rgb(170, 170, 170);
+}
+
+.Login-button {
+  background: rgb(0, 68, 255);
+  font-style: normal;
+  font-family: "Epilogue", serif;
+  color: white;
+  border: rgb(0, 68, 255);
+  font-size: 25px;
+  padding: 5px;
+  width: 100%;
+  margin-top: 20px;
+  border-radius: 8px;
+}
+
+.PhantomSignIn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+#t01 {
+  text-align: center;
+  opacity: 0.69;
+  font-weight: 400;
+  font-style: normal;
+  font-family: "Epilogue", serif;
+  color: #000000;
+  font-size: 18px;
+  letter-spacing: 0px;
+  margin-top:15px;
+}
+
+#t02 {
+  text-align: center;
+  opacity: 0.69;
+  font-weight: 400;
+  font-style: normal;
+  font-family: "Epilogue", serif;
+  color: #000000;
+  font-size: 18px;
+  letter-spacing: 0px;
+}
+
+.Symbol {
+  width: 50px;
+  height: 30px;
+  overflow: visible;
+  padding-top: 0px;
+  padding-left: 20px;
+}
+
+input.KYCcheckbox {
+  background:rgb(0, 68, 255);
+  border:solid rgb(0, 68, 255);
+  color: rgb(255, 255, 255);
+  border-radius: 8px;
+}
+
+.KYC {
+  margin-left:53%;
+  width: auto; /* 75px */
+  height: auto; /* 16px */
+  overflow: visible;
+  white-space: pre;
+  opacity: 0.69;
+  font-weight: 400;
+  font-style: normal;
+  font-family: "Epilogue", serif;
+  color: #000000;
+  font-size: 17px;
+  letter-spacing: 0px;
+}
+
+#l01 {
+  margin: 20px;
+  margin-top: 60px;
+}
+
+#t03 {
+  width: 80px;
+  height: 100px;
+}
+
+#r01 {
+  margin-top: 20px;
+}

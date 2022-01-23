@@ -1,0 +1,10 @@
+#g00 {
+    border-radius: 50%;
+    height: 200px;
+    width: 200px;
+    text-align: center;
+    margin-top: auto;
+    margin-bottom: auto;
+    padding: 80px 20px;
+    background: lime;
+}

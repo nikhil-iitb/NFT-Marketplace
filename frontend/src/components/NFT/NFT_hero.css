@@ -1,0 +1,9 @@
+.prop-item {
+    border: 1px solid #1b9ab6;
+    color: #1b9ab6;
+    background-color: #2c3136;
+    border-radius: 10px;
+    height: 90px;
+    width: auto;
+    cursor: pointer;
+}

@@ -1,0 +1,71 @@
+<html>
+  <head>
+    <!-- Moralis SDK code -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="https://unpkg.com/moralis/dist/moralis.js"></script>
+  </head>
+  <body>
+    <h1>Gas Stats With Moralis</h1>
+
+     <!-- <button id="btn-login" onClick=login()>Moralis Login</button> -->
+    <!-- <button id="btn-logout">Logout</button> -->
+    <input type="text" id="name" name="name"/>
+    <input type="text" id="description" name="description"/>
+    <input type="file" name="fileInput" id="fileInput"/>
+    <button onClick=upload()>Upload to IPFS</button>
+
+    <script>
+      
+      // connect to Moralis server
+      const serverUrl = "https://sccrwvbnvmpf.usemoralis.com:2053/server"
+      const appId = "4wBzDB5Ze6BdwMYbjMbUNzuFXc8E4cAZ8BecrKwS"
+      Moralis.start({ serverUrl, appId });
+    // Moralis.initialize("4wBzDB5Ze6BdwMYbjMbUNzuFXc8E4cAZ8BecrKwS");
+    // Moralis.serverURL = "https://sccrwvbnvmpf.usemoralis.com:2053/server";
+
+      login = async() => {
+    // const user = await Moralis.User.logIn("nikhiltiwari1912@gmail.com", "Electroshoe@123");
+    Moralis.authenticate().then(function (user) {
+    console.log(user.get('ethAddress'))
+})
+}
+
+//upload image
+      uploadimage = async () => {
+        const data = fileInput.files[0];
+        const file = new Moralis.File(data.name, data);
+        await file.saveIPFS({useMasterKey:true});
+        // await file.saveIPFS({useMasterKey:true});
+        console.log(file.ipfs(), file.hash());
+        return file.ipfs(); 
+      }
+
+      //login
+
+//upload metadata
+      uploadMetadata = async (imageUrl) => {
+        
+
+        const name = document.getElementById("name").value;
+        const description = document.getElementById("description").value;
+
+        const metadata = {
+            "name": name,
+            "description": description,
+            "image": imageUrl,
+        }
+
+        const file = new Moralis.File("file.json", {base64: btoa(JSON.stringify(metadata))})
+        await file.saveIPFS({useMasterKey:true});
+
+        console.log(file.ipfs())
+      }
+
+    upload = async () => {
+          const image = await uploadimage();
+           await uploadMetadata(image);
+      }
+
+    </script>
+  </body>
+</html>

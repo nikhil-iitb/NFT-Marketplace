@@ -1,0 +1,91 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200&display=swap");
+.menu-large {
+  display: none;
+}
+.main-large {
+  display: none;
+}
+
+.title {
+    font-weight: 1000;
+    font-family: Epilogue;
+}
+
+.menu {
+  width: 700px;
+  height: 60px;
+  /* background-color: rgb(255, 255, 255); */
+  display: flex !important; 
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px;
+  font-family: Epilogue;
+  font-weight: bold;
+  box-shadow: black, 5px;
+}
+
+.menu-item {
+    font-family: Epilogue;
+    font-weight: bold;
+    color: black;
+}
+
+.dropdown-container {
+  width: 79px;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.dropdown-container > div {
+  display: flex;
+  flex-direction: row;
+}
+.dropdown-container > div > img {
+  width: 32px;
+  height: 32px;
+}
+.dropdown-container > div > button {
+  width: 32px;
+  border: none;
+  /* background-color: white; */
+}
+.down-icon {
+  width: 18px;
+  height: 18px;
+}
+.search-container {
+  width: 270px;
+  height: 45px;
+  border-style: solid;
+  border: 1px solid rgb(229, 232, 235);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 8px;
+}
+.search-container > div {
+  width: 40px;
+}
+.search-icon {
+  width: 20px;
+  height: 20px;
+}
+.search-input {
+  width: 400px !important;
+  height: 40px !important;
+  border: none;
+  font-size: 14pt;
+  color: rgba(255, 78, 24, 0.534);
+  font-family: "Epilogue";
+  margin-left: 16px;
+  outline: none;
+}
+.search-container > input:focus {
+  color: black;
+}
+.check-icon {
+  color: #3291e9;
+}

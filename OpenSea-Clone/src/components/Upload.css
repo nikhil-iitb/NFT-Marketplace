@@ -1,0 +1,87 @@
+/* .details {
+    width: 10%;
+} */
+
+/* .upload {
+    width: auto;
+}  */
+
+#u00 {
+    margin: 0px;
+}
+
+#det {
+    width: 30%;
+}
+
+#up {
+    /* background-image: url("C:\Users\tiwar\nftmarket\OpenSea-Clone\src\components\up.png"); */
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+#heading {
+    font-family: Epilogue;
+    font-size: 40px;
+    font-weight: bold;
+    float: left;
+    /* margin: 20px; */
+    margin-left: 0px;
+    margin-bottom: 0px;
+}
+
+#c00 {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+    width: 70%;
+}
+
+#c01 {
+    color: rgb(53, 50, 50);
+    font-weight: bold;
+    /* margin-bottom: 5px; */
+    margin-top: 5px;
+    /* margin-left: 20px; */
+}
+
+#c02 {
+    color: rgb(175, 165, 165);
+    margin-bottom: 20px;
+    /* margin-left: 5px; */
+}
+
+#c03 {
+    border-style: dashed;
+    border-color: gray;
+    border-radius: 15px;
+    height: 250px;
+    margin-bottom: 10px;
+}
+
+#c03 :hover {
+    background-color: black;
+}
+
+#c04 {
+    border-radius: 10px;
+    height: 50px;
+    border: 3px solid gainsboro;
+    width: 100%;
+    margin: 10px auto;
+    float: left;
+}
+
+#h06 {
+    height: 50px;
+    width: 20%;
+    padding: 0px;
+    background-color: rgb(32, 129, 226);
+    border: 1px solid rgb(32, 129, 226);
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+    border-radius: 5px;
+    font-family: Epilogue;
+    font-weight: 60;
+    margin: 30px 0px;
+}

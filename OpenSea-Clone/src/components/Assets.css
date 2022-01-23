@@ -1,0 +1,118 @@
+
+.digital-assets {
+    width: auto; /* 210px */
+    height: auto; /* 32px */
+    overflow: visible;
+    white-space: pre;
+    font-weight: 800;
+    font-style: normal;
+    font-family: "Epilogue", serif;
+    color: #000000;
+    font-size: 40px;
+    letter-spacing: -1px;
+    line-height: 1;
+    text-align: left;
+  }
+
+.group-button {
+    border: solid rgb(8, 68, 253);
+    border-radius: 13px;
+    background: rgb(8, 68, 253);
+    color: rgb(255,255,255);
+    font-style: normal;
+    font-family: "Epilogue", serif;
+    height: 40px;
+    width: 45%;
+    text-align: center;
+    font-size: 18px;
+}
+
+.container-fluid {
+    margin: 30px;
+}
+
+#a01 {
+    float: left;
+    width: 50%;
+    text-align: center;
+    margin: auto;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    background-color: #f7f8fc;
+    font-family: "Roboto", sans-serif;
+    color: #10182f;
+  }
+  .container {
+    display: flex;
+    width: 1040px;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+  }
+  .card {
+    margin: 10px;
+    margin-top: 40px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    width: 300px;
+  }
+
+  /* #b00 :hover {
+    box-shadow: 0px 15px 26px rgba(0, 0, 0, 0.50);
+  } */
+  .card-header img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+  }
+  
+
+  
+  .card-body p {
+    font-size: 13px;
+    margin: 0 0 40px;
+  }
+  .user {
+    display: flex;
+    margin-top: auto;
+  }
+ 
+  .user-info{
+    width: auto; /* 140px */
+    height: auto; /* 19px */
+    overflow: visible;
+    white-space: pre;
+    font-weight: 800;
+    font-style: normal;
+    font-family: "Epilogue", serif;
+    color: #3f3b3b;
+    font-size: 19px;
+    letter-spacing: -1px;
+    line-height: 1;
+    text-align: left;
+  }
+
+.card-logo {
+    height: 38%;
+    width: 40%;
+    margin-left: 10px;
+}
+
+#a02 {
+  margin-left: 60%;
+  color: #dd7878;
+  font-size: 80%;
+}

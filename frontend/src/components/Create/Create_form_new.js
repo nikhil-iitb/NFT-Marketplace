@@ -19,7 +19,7 @@ const client = makeStorageClient();
  
 function Create_form_new(){
   const [formInput, updateFormInput] = useState({ image:'', collectionName: '', name: '', description: '', price:'', blockchain:'' })
- 
+  const [fileIpfs, updatefileIpfs] = useState("");
   const imageHandler = async (e) => {
  
     if(e.target.files.length > 0) {
@@ -33,7 +33,46 @@ function Create_form_new(){
       updateFormInput({ ...formInput, image: e.target.files[0] })
     }
   }
- 
+  function makeFileObjects(metadata) {
+    // You can create File objects from a Blob of binary data
+    // see: https://developer.mozilla.org/en-US/docs/Web/API/Blob
+    // Here we're just storing a JSON object, but you can store images,
+    // audio, or whatever you want!
+    const obj = metadata
+    const blob = new Blob([JSON.stringify(obj)], {type : 'application/json'})
+  
+    const files = [
+      new File(['contents-of-file-1'], 'plain-utf8.txt'),
+      new File([blob], 'hello.json')
+    ]
+    return files
+  }
+
+  async function handleUpload(){
+    const fileInput = document.querySelector('input[type="file"]');
+    const fileforupload = fileInput.files;
+    try {
+      const cid = await client.put(fileforupload);
+      console.log("Your file has been uploaded on Filecoin");
+      console.log("Your cid is: " + cid);
+      let metadata = {
+        "image": "ipfs://"+cid,
+        "collectionName": formInput.collectionName,
+        "name": formInput.name,
+        "description": formInput.description,
+      }
+      let blob = makeFileObjects(metadata)
+
+      const cid_metadata = await client.put(blob);
+      console.log("Your cid is: " + cid_metadata);
+      updatefileIpfs("ipfs://"+cid_metadata)
+    } catch (error) {
+      console.log("Error uploading the file: ", error);
+    }
+    
+  }
+
+
   async function handleSubmit(){
     const user = localStorage.getItem("user_id")
     //TODO - get user id from localstorage
@@ -46,7 +85,10 @@ function Create_form_new(){
     formData.append("price", formInput.price);
     formData.append("blockchain", formInput.blockchain);
     formData.append("user_id", user);
-    await fetch("http://localhost:3001/store_lazyMintedNFTs", {
+    formData.append("ipfs_url", fileIpfs);
+    
+    
+      await fetch("http://localhost:3001/store_lazyMintedNFTs", {
       method: "POST",
       body: formData,
       headers: {
@@ -62,6 +104,8 @@ function Create_form_new(){
       .catch((error) => {
         console.error(error);
       });
+  
+    
   }
  
     return (
@@ -210,6 +254,7 @@ function Create_form_new(){
                   />
                 </div>
  
+                
                 <button
                   type="submit"
                   className="btn btn-primary btn-lg my-2 border border-dark"
@@ -218,6 +263,14 @@ function Create_form_new(){
                   Create NFT
                 </button>
               </form>
+              <button
+                  // type="submit"
+                  className="btn btn-primary btn-lg my-2 border border-dark"
+                  style={{ borderRadius: "10px", width: "200px" }}
+                  onClick={handleUpload}
+                >
+                  Upload Files
+                </button>
             </div>
           </div>
         </div>

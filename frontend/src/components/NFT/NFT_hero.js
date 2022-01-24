@@ -496,7 +496,7 @@ class NFT_Hero extends React.Component {
       priceininr: 0,
     };
     this.getCreator = this.getCreator.bind(this);
-    // this.buy = this.buy.bind(this);
+    this.buy = this.buy.bind(this);
     this.getUser = this.getUser.bind(this);
     // this.getBalance = this.getBalance.bind(this);
   }
@@ -549,38 +549,43 @@ class NFT_Hero extends React.Component {
   //   });
   // };
  
-  // buy = async (nft_id) => {
-  //   alert(
-  //     "Please visit https://www.simplex.com/buy-crypto and make sure you have " +
-  //       this.state.returnednft.price +
-  //       " SOL in your wallet. Your wallet's public address is " +
-  //       this.state.user.wallet_pub_key +
-  //       ". Click OK and you will be redirected to the website. Once you are done, come back and click Ok on another alert"
-  //   );
-  //   window.open("https://www.simplex.com/buy-crypto");
-  //   alert("Are you done?");
-  //   const apiURL =
-  //     "http://localhost:3001/purchase/" +
-  //     nft_id +
-  //     "/" + localStorage.getItem("user_id");
-  //     //todo
-  //     // localStorage.getItem("user_id");
-  //   trackPromise(
-  //     fetch(apiURL)
-  //       .then((res) => res.json())
-  //       .then((result) => {
-  //         console.log("Here is the status of transfer");
-  //         console.log(result);
-  //         window.location.href = "/";
-  //       })
-  //       .catch((err) => {
-  //         alert(
-  //           "Transfer could not occur. Make sure you have enough balance in your wallet to buy this NFT. Contact us if you are facing issues"
-  //         );
-  //         console.log("Error");
-  //       })
-  //   );
-  // };
+  buy = async (nft_id) => {
+    let wallet_pub = ""
+    if (this.state.returnednft.blockchain == 'Solana'){
+      wallet_pub = this.state.user.wallet_pub_key
+    }
+    else{
+      wallet_pub = this.state.user.matic_wallet_pub_key
+    }
+    alert(
+      "Please visit https://www.simplex.com/buy-crypto and make sure you have " +
+        this.state.returnednft.price + this.state.returnednft.blockchain + 
+        " in your wallet. Your wallet's public address is " +
+        wallet_pub +
+        ". Click OK and you will be redirected to the website. Once you are done, come back and click Ok on another alert"
+    );
+    window.open("https://www.simplex.com/buy-crypto");
+    alert("Are you done?");
+    const apiURL =
+      "http://localhost:3001/purchase/" +
+      nft_id +
+      "/" + localStorage.getItem("user_id")+"/" + this.state.returnednft.user_id;
+    trackPromise(
+      fetch(apiURL)
+        .then((res) => res.json())
+        .then((result) => {
+          console.log("Here is the status of transfer");
+          console.log(result);
+          window.location.href = "/";
+        })
+        .catch((err) => {
+          alert(
+            "Transfer could not occur. Make sure you have enough balance in your wallet to buy this NFT. Contact us if you are facing issues"
+          );
+          console.log("Error");
+        })
+    );
+  };
  
   componentDidMount = async () => {
     this.nft_id = Number(window.location.href.split("=")[1]);
@@ -597,7 +602,7 @@ class NFT_Hero extends React.Component {
             returnednft: result,
           });
           this.getCreator(result.user_id);
-          const url = "http://localhost:3001/soltoinr";
+          const url = "http://localhost:3001/soltoinr/"+result.blockchain;
           fetch(url)
             .then((res) => res.json())
             .then(
@@ -866,7 +871,7 @@ class NFT_Hero extends React.Component {
                 <div className="me-2">
                   Owned by{" "}
                   {/* <a href={"/profile?user=" + this.state.creator.user_id}> */}
-                    {this.state.returnednft.public_key}
+                    {this.state.returnednft.user_id}
                   {/* </a> */}
                 </div>
                 <div className="me-2">

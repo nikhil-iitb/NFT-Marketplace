@@ -17,6 +17,8 @@ const request = require("request-promise");
 const wallet = require('ethereumjs-wallet');
 // const sgMail = require('@sendgrid/email')
 
+
+
 const accountSid = "AC10475566a0ed3abd09eebbd13f2763fc";
 const authToken = "27bdd7364645a6b77ab4969ba50edb78";
 const client = new twilio(accountSid, authToken);
@@ -1806,8 +1808,8 @@ app.post("/store_lazyMintedNFTs", upload.single("image"), (req, res) => {
 
       // inserting data in database
       db.getConnection(async (err, connection) => {
-        const sql_insert = "INSERT INTO lazymintednfts VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        const sql_query = mysql.format(sql_insert, [name, description, price, blockchain, image, collectionName, hash, public_key, 0, 0, user_id, fullFile, ipfs_url]);
+        const sql_insert = "INSERT INTO lazymintednfts VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const sql_query = mysql.format(sql_insert, [name, description, price, blockchain, image, collectionName, hash, public_key, 0, 0, user_id, fullFile, ipfs_url, "0", public_key]);
         const sql_ask = "SELECT id FROM lazymintednfts WHERE image = ?";
         const SQLQUERY = mysql.format(sql_ask, [image]);
         await connection.query(sql_query, async (err, result) => {
@@ -1875,6 +1877,9 @@ app.get("/purchase/:nft_id/:user_id_buyer/:user_id_seller", (req, res) => {
                   let res = mintNFTonSolana(keypair, data_nft.id, data_nft.price, keypair_buyer)
                   // console.log("after minting", res)
                 }
+                else{
+                  let res = mintEthNFT()
+                }
               }
             });
           });
@@ -1927,7 +1932,7 @@ function verifyMintingSignature(data_nft, data_seller) {
 
 async function mintNFTonSolana(
   myKeypair,
-  nft_id, 
+  nft_id,
   price,
   keypair_buyer
 ) {
@@ -2067,3 +2072,4 @@ async function transferOnSolana(tokenMintAddress, from, to, price, nft_id) {
 
 
 }
+

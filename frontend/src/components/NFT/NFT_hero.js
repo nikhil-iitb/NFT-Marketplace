@@ -528,59 +528,59 @@ class NFT_Hero extends React.Component {
       });
   };
  
-  // getBalance = async (publicKey) => {
-  //   console.log("Welcome to getBalance function: " + bs58.decode(publicKey));
-  //   const createConnection = () => {
-  //     return new Connection(clusterApiUrl("devnet"));
-  //   };
-  //   const connection = createConnection();
+  getBalance = async (publicKey) => {
+    console.log("Welcome to getBalance function: " + bs58.decode(publicKey));
+    const createConnection = () => {
+      return new Connection(clusterApiUrl("devnet"));
+    };
+    const connection = createConnection();
  
-  //   const lamports = await connection
-  //     .getBalance(bs58.decode(publicKey))
-  //     .catch((err) => {
-  //       console.error(err);
-  //       console.log("We have a problem");
-  //     });
-  //   // const lamports = await connection.getBalance(bs58.decode(publicKey))
-  //   console.log(lamports);
-  //   console.log("The balance is " + lamports / LAMPORTS_PER_SOL);
-  //   this.setState({
-  //     balance: lamports / LAMPORTS_PER_SOL,
-  //   });
-  // };
+    const lamports = await connection
+      .getBalance(bs58.decode(publicKey))
+      .catch((err) => {
+        console.error(err);
+        console.log("We have a problem");
+      });
+    // const lamports = await connection.getBalance(bs58.decode(publicKey))
+    console.log(lamports);
+    console.log("The balance is " + lamports / LAMPORTS_PER_SOL);
+    this.setState({
+      balance: lamports / LAMPORTS_PER_SOL,
+    });
+  };
  
-  // buy = async (nft_id) => {
-  //   alert(
-  //     "Please visit https://www.simplex.com/buy-crypto and make sure you have " +
-  //       this.state.returnednft.price +
-  //       " SOL in your wallet. Your wallet's public address is " +
-  //       this.state.user.wallet_pub_key +
-  //       ". Click OK and you will be redirected to the website. Once you are done, come back and click Ok on another alert"
-  //   );
-  //   window.open("https://www.simplex.com/buy-crypto");
-  //   alert("Are you done?");
-  //   const apiURL =
-  //     "http://localhost:3001/purchase/" +
-  //     nft_id +
-  //     "/" + localStorage.getItem("user_id");
-  //     //todo
-  //     // localStorage.getItem("user_id");
-  //   trackPromise(
-  //     fetch(apiURL)
-  //       .then((res) => res.json())
-  //       .then((result) => {
-  //         console.log("Here is the status of transfer");
-  //         console.log(result);
-  //         window.location.href = "/";
-  //       })
-  //       .catch((err) => {
-  //         alert(
-  //           "Transfer could not occur. Make sure you have enough balance in your wallet to buy this NFT. Contact us if you are facing issues"
-  //         );
-  //         console.log("Error");
-  //       })
-  //   );
-  // };
+  buy = async (nft_id) => {
+    alert(
+      "Please visit https://www.simplex.com/buy-crypto and make sure you have " +
+        this.state.returnednft.price +
+        " SOL in your wallet. Your wallet's public address is " +
+        this.state.user.wallet_pub_key +
+        ". Click OK and you will be redirected to the website. Once you are done, come back and click Ok on another alert"
+    );
+    window.open("https://www.simplex.com/buy-crypto");
+    alert("Are you done?");
+    const apiURL =
+      "http://localhost:3001/purchase/" +
+      nft_id +
+      "/" + localStorage.getItem("user_id");
+      //todo
+      // localStorage.getItem("user_id");
+    trackPromise(
+      fetch(apiURL)
+        .then((res) => res.json())
+        .then((result) => {
+          console.log("Here is the status of transfer");
+          console.log(result);
+          window.location.href = "/";
+        })
+        .catch((err) => {
+          alert(
+            "Transfer could not occur. Make sure you have enough balance in your wallet to buy this NFT. Contact us if you are facing issues"
+          );
+          console.log("Error");
+        })
+    );
+  };
  
   componentDidMount = async () => {
     this.nft_id = Number(window.location.href.split("=")[1]);

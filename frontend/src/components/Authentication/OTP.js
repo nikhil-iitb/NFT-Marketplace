@@ -42,9 +42,11 @@ class OTP extends React.Component {
     var api_url;
     event.preventDefault();
     if(this.state.returnedUser.id_chosen=="Aadhar"){
-    api_url = "http://localhost:3001/verifyotp/"+this.state.returnedUser.contact_number+"/"+this.state.returnedUser.email+"/1/"+this.state.returnedUser.id_status}
+      console.log("Aadhar")
+    api_url = "http://localhost:3001/verifyotp/"+this.state.returnedUser.Contact_number+"/"+this.state.returnedUser.email+"/1/"+this.state.returnedUser.id_status}
     else{
-    api_url = "http://localhost:3001/verifyotp/"+this.state.returnedUser.contact_number+"/"+this.state.returnedUser.email+"/0/"
+      console.log("Calling verifyotp")
+    api_url = "http://localhost:3001/verifyotp/"+this.state.returnedUser.Contact_number+"/"+this.state.returnedUser.email+"/0/"+"no_aadhar"
     }
     fetch(api_url, {
       method: "POST",

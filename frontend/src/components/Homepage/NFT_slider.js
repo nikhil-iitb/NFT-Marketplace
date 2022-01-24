@@ -91,7 +91,7 @@ class NFT_slider extends React.Component {
                       {item.description}
                     </span>
                     <span className="lead col-6 text-end">
-                      {/* <i class="uil uil-heart-alt" onClick={()=> this.like_nft(item.id)}/> {item.no_of_likes} */}
+                      <i class="uil uil-heart-alt" onClick={()=> this.like_nft(item.id)}/> {item.no_of_likes}
                     </span>
                   </div>
                 </div>

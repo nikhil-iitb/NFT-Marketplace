@@ -74,6 +74,9 @@ class OTP extends React.Component {
             localStorage.clear();
             window.location.href = "/login";
           }
+          else {
+            window.location.href="/"
+          }
         },
         (error) => {
           this.setState({ error });

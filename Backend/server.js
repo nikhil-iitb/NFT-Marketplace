@@ -536,20 +536,35 @@ app.get("/soltoinr/:blockchain", (request, response) => {
 getsoltoinr = async () => {
   console.log(soltoinr);
 };
+
+
 app.post("/verifyotp/:contact_number/:email/:chosen/:requestid", (req, res) => {
   contact_number = req.params.contact_number
   email = req.params.email
   console.log("Checking otp....");
+  var request_id;
 
+  
 
   if (Number(req.params.chosen) == 1) {
     console.log("Ready to send otp for aadhar verification")
+    db.getConnection( async(err, connection) => {
+      if (err) throw (err)
+      const sql_ask = "SELECT id_status FROM user_info WHERE email = ?"
+      const sql_query = mysql.format(sql_ask, [req.params.email])
+      await connection.query(sql_query, async(err, result) => {
+        connection.release()
+        if (err) throw (err)
+        request_id = result[0].id_status
+        console.log(request_id+"request_id")
+     
+    console.log("Outside"+request_id)
     const options = {
       method: "POST",
       uri: "https://test.zoop.one/in/identity/okyc/otp/verify",
       body: JSON.stringify({
         data: {
-          "request_id": req.params.requestid,
+          "request_id": request_id,
           "otp": req.body.aadhar_otp,
           "consent": "Y",
           "consent_text": "I hear by declare my consent agreement for fetching my information via ZOOP API."
@@ -586,6 +601,8 @@ app.post("/verifyotp/:contact_number/:email/:chosen/:requestid", (req, res) => {
         }
       })
       .catch((err) => console.log(err));
+    })
+  })
   }
 
 
@@ -857,8 +874,29 @@ app.get("/fetch_profile_nfts/:user_id", (req, res) => {
   db.getConnection(async (err, connection) => {
     if (err) throw err;
     console.log("user_id = ", req.params.user_id)
-    sql_ask = "Select * from nfts_created where user_id = ? Union Select * from nfts_created where nfts_created.idnfts_created in (select nftowners.idnfts_created from nftowners where nftowners.user_id = ?)"
-    connection.query(mysql.format(sql_ask, [req.params.user_id, req.params.user_id]), (err, result) => {
+    // sql_ask = "Select * from nfts_created where user_id = ? Union Select * from nfts_created where nfts_created.idnfts_created in (select nftowners.idnfts_created from nftowners where nftowners.user_id = ?)"
+    sql_ask = "Select * from lazymintednfts where owner_user_id=?"
+    // connection.query(mysql.format(sql_ask, [req.params.user_id, req.params.user_id]), (err, result) => {
+    connection.query(mysql.format(sql_ask, [req.params.user_id]), (err, result) => {
+      if (err) throw err;
+      connection.release();
+      if (!err) {
+        res.send(result);
+        console.log("NFTs fetched successfully for profile");
+        console.log(result);
+      }
+    })
+  })
+})
+
+app.get("/fetch_profile_nfts_created/:user_id", (req, res) => {
+  db.getConnection(async (err, connection) => {
+    if (err) throw err;
+    console.log("user_id = ", req.params.user_id)
+    // sql_ask = "Select * from nfts_created where user_id = ? Union Select * from nfts_created where nfts_created.idnfts_created in (select nftowners.idnfts_created from nftowners where nftowners.user_id = ?)"
+    sql_ask = "Select * from lazymintednfts where user_id=?"
+    // connection.query(mysql.format(sql_ask, [req.params.user_id, req.params.user_id]), (err, result) => {
+    connection.query(mysql.format(sql_ask, [req.params.user_id]), (err, result) => {
       if (err) throw err;
       connection.release();
       if (!err) {
@@ -1216,14 +1254,14 @@ app.get("/show_nfts", (req, res) => {
 app.get("/show_nfts_for_sale", (req, res) => {
   db.getConnection(async (err, connection) => {
     if (err) throw err;
-    const sql_query = "SELECT * FROM lazymintednfts WHERE primary_sale_done=?";
-    const sql_Query_1 = mysql.format(sql_query, [0]);
+    const sql_query = "SELECT * FROM lazymintednfts WHERE available_for_sale=?";
+    const sql_Query_1 = mysql.format(sql_query, [1]);
     await connection.query(sql_Query_1, (err, result) => {
       if (err) throw err;
       connection.release();
       if (!err) {
         res.send(result);
-        console.log("nfts to be sold", result);
+        // console.log("nfts to be sold", result);
       }
     });
   });
@@ -1762,6 +1800,9 @@ app.post("/store_lazyMintedNFTs", upload.single("image"), (req, res) => {
   const collectionName = req.body.collectionName;
   const description = req.body.description;
   const price = Number(req.body.price);
+  console.log("Price"+price)
+  const royalty = Number(req.body.royalty);
+  console.log(royalty)
   const blockchain = req.body.blockchain;
   const user_id = req.body.user_id;
   const image = req.file.filename;
@@ -1778,7 +1819,8 @@ app.post("/store_lazyMintedNFTs", upload.single("image"), (req, res) => {
     "blockchain": blockchain,
     "image": image
   }
-
+console.log("While storing")
+console.log(msg)
   const strMsg = JSON.stringify(msg)
   console.log(strMsg);
   let secretKey = '';
@@ -1807,8 +1849,9 @@ app.post("/store_lazyMintedNFTs", upload.single("image"), (req, res) => {
 
       // inserting data in database
       db.getConnection(async (err, connection) => {
-        const sql_insert = "INSERT INTO lazymintednfts VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        const sql_query = mysql.format(sql_insert, [name, description, price, blockchain, image, collectionName, hash, public_key, 0, 0, user_id, fullFile, ipfs_url, "0", public_key]);
+        const sql_insert = "INSERT INTO lazymintednfts VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const sql_query = mysql.format(sql_insert, [name, description, price, blockchain, image, collectionName, hash, public_key, 0, 0, user_id, fullFile, ipfs_url, "0", public_key, user_id, 0, royalty, 0, 1]);
+        console.log(sql_query)
         const sql_ask = "SELECT id FROM lazymintednfts WHERE image = ?";
         const SQLQUERY = mysql.format(sql_ask, [image]);
         await connection.query(sql_query, async (err, result) => {
@@ -1833,9 +1876,10 @@ app.post("/store_lazyMintedNFTs", upload.single("image"), (req, res) => {
 });
 
 
-app.get("/purchase/:nft_id/:user_id_buyer/:user_id_seller", (req, res) => {
+app.get("/purchase/:nft_id/:user_id_buyer/:user_id_seller/:user_id_creator", (req, res) => {
   const user_id_buyer = req.params.user_id_buyer;
   const user_id_seller = req.params.user_id_seller;
+  const user_id_creator = req.params.user_id_creator;
   const nft_id = req.params.nft_id;
   db.getConnection(async (err, connection) => {
     const sql_ask = "SELECT * FROM lazymintednfts WHERE id = ?";
@@ -1861,6 +1905,19 @@ app.get("/purchase/:nft_id/:user_id_buyer/:user_id_seller", (req, res) => {
 
           let keypair_buyer = Keypair.fromSecretKey(secretKey);
 
+          db.getConnection(async (err, connection) => {
+            const sql_ask = "SELECT * FROM user_info WHERE user_id = ?";
+            const SQLQUERY = mysql.format(sql_ask, [user_id_creator]);
+            await connection.query(SQLQUERY, (err, result) => {
+              connection.release();
+              if (err) throw err;
+              data_buyer = result[0]
+              let private_key_string = data_buyer.wallet_private_key;
+              let user_private_key = private_key_string.split(",").map(Number);
+              secretKey = Uint8Array.from(user_private_key);
+    
+              let keypair_creator = Keypair.fromSecretKey(secretKey);
+
           // getting info of seller:
           db.getConnection(async (err, connection) => {
             const sql_ask = "SELECT * FROM user_info WHERE user_id = ?";
@@ -1869,21 +1926,30 @@ app.get("/purchase/:nft_id/:user_id_buyer/:user_id_seller", (req, res) => {
               connection.release();
               if (err) throw err;
               data_seller = result[0]
+              if(data_nft.primary_sale_done == 1) {
+                royalty(data_buyer, data_seller, keypair_creator, data_nft.id)
+              }
+              else{
               let keypair = verifyMintingSignature(data_nft, data_seller)
               if (keypair !== false) {
                 console.log("reached inside true bool")
                 if (data_nft.blockchain === 'Solana') {
-                  let res = mintNFTonSolana(keypair, data_nft.id, data_nft.price, keypair_buyer)
+                  let res = mintNFTonSolana(keypair, data_nft.id, data_nft.price, keypair_buyer, user_id_buyer)
                   // console.log("after minting", res)
                 }
                 else{
                   let res = mintEthNFT()
                 }
               }
+            }
             });
           });
+        });
+
 
         });
+      });
+
       });
 
     });
@@ -1911,6 +1977,8 @@ function verifyMintingSignature(data_nft, data_seller) {
     "blockchain": data_nft.blockchain,
     "image": data_nft.image
   }
+
+
   console.log(msg)
   const strMsg = JSON.stringify(msg)
   //signing the message and creating hash
@@ -1922,6 +1990,8 @@ function verifyMintingSignature(data_nft, data_seller) {
   }
   else {
     console.log("hashes are not equal")
+    console.log(hash)
+    console.log(data_nft.hash)
     return false
   }
 
@@ -1933,7 +2003,8 @@ async function mintNFTonSolana(
   myKeypair,
   nft_id,
   price,
-  keypair_buyer
+  keypair_buyer,
+  to_user_id
 ) {
   const connection = new web3.Connection(web3.clusterApiUrl("devnet"));
   await connection.requestAirdrop(myKeypair.publicKey, 1000000000);
@@ -1975,7 +2046,7 @@ async function mintNFTonSolana(
         // connection.release();
         if (err) throw err;
         console.log("Successfully inserted data in lazymintednfts table");
-        let ress = transferOnSolana(mint.publicKey.toBase58(), myKeypair, keypair_buyer, price, nft_id)
+        let ress = transferOnSolana(mint.publicKey.toBase58(), myKeypair, keypair_buyer, price, nft_id , to_user_id, 0, myKeypair, 0)
         console.log(ress)
       });
     });
@@ -1984,7 +2055,7 @@ async function mintNFTonSolana(
 
 
 
-async function transferOnSolana(tokenMintAddress, from, to, price, nft_id) {
+async function transferOnSolana(tokenMintAddress, from, to, price, nft_id, to_user_id, is_secondary, original_creator, royalty) {
   let lamports;
   if (from.publicKey == to.publicKey) {
     console.log("Not possible, same buyer, same seller");
@@ -2050,20 +2121,41 @@ async function transferOnSolana(tokenMintAddress, from, to, price, nft_id) {
 
     db.getConnection(async (err, connection) => {
       const sql_ask =
-        "UPDATE lazymintednfts SET primary_sale_done=?, owner=? WHERE id = ?";
+        "UPDATE lazymintednfts SET primary_sale_done=?, owner=?, owner_user_id=?, public_mint_address=?, available_for_sale=? WHERE id = ?";
 
       const sql_query_new = mysql.format(sql_ask, [
         1,
         to.publicKey.toBase58(),
-        nft_id
+        to_user_id,
+        tokenMintAddress,
+        0,
+        nft_id,
       ]);
 
       await connection.query(sql_query_new, async (err, result) => {
-        // connection.release();
+        connection.release();
         if (err) throw err;
         if (!err) {
           console.log("successfully manipulated the lazymintednfts table");
-
+          if (is_secondary == 1)
+          {
+            var newtransaction1  = await new web3.Transaction().add(
+              web3.SystemProgram.transfer({
+                fromPubkey: to.publicKey,
+                toPubkey: original_creator.publicKey,
+                lamports: Number(royalty) * web3.LAMPORTS_PER_SOL,
+              })
+            );
+        
+            var signature1 = await web3.sendAndConfirmTransaction(
+              connection,
+              newtransaction1,
+              [to],
+              { commitment: "confirmed" }
+            );
+            console.log("Royalty SIGNATURE", signature1);
+            console.log(" SENT Royalty TO FROM.pub_key: SUCCESS")
+          }
         }
       });
     });
@@ -2072,20 +2164,59 @@ async function transferOnSolana(tokenMintAddress, from, to, price, nft_id) {
 
 }
 
-   
+app.post(
+  "/secondarysale/:id",
+  (req, res, err) => {
+    const secondaryprice = req.body.secondaryprice; //secondary price
+    db.getConnection(async (err, connection) => {
+      const sql_insert = "UPDATE lazymintednfts SET secondary_price = ?, available_for_sale=? WHERE id = ?"
+      const sql_query = mysql.format(sql_insert, [
+        Number(secondaryprice),
+        1,
+        Number(req.params.id)
+      ]);
+      await connection.query(sql_query, (err, result) => {
+        connection.release();
+        if (err) throw err;
+        console.log("Successfully Uploaded the secondary price");
+        if (!err) {
+          // res.send({ data: result, msg: "Your image has been updated" });
+        }
+      });
+    });
+  }
+);
    
 
   
   
-function royalty(id) {
+function royalty(data_buyer, data_seller, keypair_original_creator, id) {
+  let private_key_string = data_seller.wallet_private_key;
+  let user_private_key = private_key_string.split(",").map(Number);
+  secretKey = Uint8Array.from(user_private_key);
+
+  let mykeypair = Keypair.fromSecretKey(secretKey);
+
+  let private_key_string1 = data_buyer.wallet_private_key;
+  let user_private_key1 = private_key_string1.split(",").map(Number);
+  secretKey1 = Uint8Array.from(user_private_key1);
+
+  let keypair_buyer = Keypair.fromSecretKey(secretKey1);
+
   db.getConnection( async(err, connection) => {
-    const sql_ask = "SELECT secondary_price, royalty from lazymintednfts where id=?"
+    const sql_ask = "SELECT * from lazymintednfts where id=?"
+    console.log(id)
     const sql_query = mysql.format(sql_ask, id)
     await connection.query(sql_query, async(err,result)=> {
       connection.release()
       if (err) throw (err)
-      const for_original_creator = secondary_price*royalty/100
-
+      const royaltyprice = result[0].secondary_price*result[0].royalty/100
+      console.log(royaltyprice)
+      const price = result[0].secondary_price - royaltyprice
+      let to_user_id = data_buyer.user_id
+      const public_mint_address = result[0].public_mint_address
+      console.log(public_mint_address)
+      transferOnSolana(public_mint_address, mykeypair, keypair_buyer, price, id , to_user_id, 1, keypair_original_creator, royaltyprice )
     })
   })
 }

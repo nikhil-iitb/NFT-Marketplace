@@ -86,9 +86,16 @@ class NFT_slider extends React.Component {
                     >
                       {item.name}
                     </h4>
+                    {item.primary_sale_done != 1 ?
                     <h4 className="col-6 text-end">{item.price} ◎</h4>
+                    :
+                    <h4 className="col-6 text-end">{item.secondary_price} ◎</h4>
+                    }
                     <span className="col-6 text-start">
                       {item.description}
+                    </span>
+                    <span className="col-6 text-start">
+                    {item.primary_sale_done == 1? <span>Listed for Secondary Sale</span> : <span>For primary sale</span>}
                     </span>
                     <span className="lead col-6 text-end">
                       <i class="uil uil-heart-alt" onClick={()=> this.like_nft(item.id)}/> {item.no_of_likes}

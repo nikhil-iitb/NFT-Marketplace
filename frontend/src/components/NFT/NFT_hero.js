@@ -528,26 +528,26 @@ class NFT_Hero extends React.Component {
       });
   };
  
-  // getBalance = async (publicKey) => {
-  //   console.log("Welcome to getBalance function: " + bs58.decode(publicKey));
-  //   const createConnection = () => {
-  //     return new Connection(clusterApiUrl("devnet"));
-  //   };
-  //   const connection = createConnection();
+  getBalance = async (publicKey) => {
+    console.log("Welcome to getBalance function: " + bs58.decode(publicKey));
+    const createConnection = () => {
+      return new Connection(clusterApiUrl("devnet"));
+    };
+    const connection = createConnection();
  
-  //   const lamports = await connection
-  //     .getBalance(bs58.decode(publicKey))
-  //     .catch((err) => {
-  //       console.error(err);
-  //       console.log("We have a problem");
-  //     });
-  //   // const lamports = await connection.getBalance(bs58.decode(publicKey))
-  //   console.log(lamports);
-  //   console.log("The balance is " + lamports / LAMPORTS_PER_SOL);
-  //   this.setState({
-  //     balance: lamports / LAMPORTS_PER_SOL,
-  //   });
-  // };
+    const lamports = await connection
+      .getBalance(bs58.decode(publicKey))
+      .catch((err) => {
+        console.error(err);
+        console.log("We have a problem");
+      });
+    // const lamports = await connection.getBalance(bs58.decode(publicKey))
+    console.log(lamports);
+    console.log("The balance is " + lamports / LAMPORTS_PER_SOL);
+    this.setState({
+      balance: lamports / LAMPORTS_PER_SOL,
+    });
+  };
  
   buy = async (nft_id) => {
     let wallet_pub = ""

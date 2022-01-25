@@ -451,7 +451,7 @@ app.get("/posts", (req, res) => {
 // });
 
 app.get("/verified/:email", (req, res) => {
-  // const email = req.body.email;
+  const email = req.params.email;
   console.log(email);
   db.getConnection(async (err, connection) => {
     if (err) throw err;
@@ -539,6 +539,7 @@ getsoltoinr = async () => {
 app.post("/verifyotp/:contact_number/:email/:chosen/:requestid", (req, res) => {
   contact_number = req.params.contact_number
   email = req.params.email
+  console.log("Checking otp....");
 
 
   if (Number(req.params.chosen) == 1) {
@@ -582,14 +583,12 @@ app.post("/verifyotp/:contact_number/:email/:chosen/:requestid", (req, res) => {
           })
         } else {
           console.log("Wrong Aadhar details");
-          return "not verified", "";
         }
       })
       .catch((err) => console.log(err));
   }
 
 
-  console.log("Checking otp....");
   const contactnumber_otp = Number(req.body.contactnumber_otp);
   const email_otp = Number(req.body.email_otp);
   console.log(contactnumber_otp + 1);
@@ -841,7 +840,7 @@ app.get("/groups/:user_id", (req, res) => {
   db.getConnection(async (err, connection) => {
     if (err) throw err;
     sql_ask =
-      "select user_id, nftowners.collection_name, Group_name, Group_id, Group_thumbnail from nftowners,group_info where nftowners.collection_name = group_info.collection_name AND nftowners.user_id=? GROUP BY group_id";
+      "select owner_user_id, collectionName, Group_name, Group_id, Group_thumbnail from lazymintednfts,group_info where lazymintednfts.collectionName = group_info.collection_name AND lazymintednfts.owner_user_id=? GROUP BY group_id";
     sql_query = mysql.format(sql_ask, [req.params.user_id]);
     await connection.query(sql_query, (err, result) => {
       if (err) throw err;
@@ -1021,7 +1020,7 @@ app.post("/likenft/:idnfts_created", (req, res) => {
   const idnfts_created = Number(req.params.idnfts_created);
   var new_likes = 0;
   db.getConnection(async (err, connection) => {
-    const sql_ask = "SELECT * FROM nfts_created WHERE idnfts_created=?";
+    const sql_ask = "SELECT * FROM lazymintednfts WHERE id=?";
     const sql_query = mysql.format(sql_ask, [idnfts_created]);
     await connection.query(sql_query, (err, result) => {
       console.log("Likes update");
@@ -1032,7 +1031,7 @@ app.post("/likenft/:idnfts_created", (req, res) => {
       // new_likes = 1;
       console.log("No. of total likes are" + new_likes);
       const sql_insert =
-        "UPDATE nfts_created SET no_of_likes = ? WHERE idnfts_created=?";
+        "UPDATE lazymintednfts SET no_of_likes = ? WHERE id=?";
       const sqlquery = mysql.format(sql_insert, [new_likes, idnfts_created]);
       connection.query(sqlquery, (err, result) => {
         connection.release();
@@ -2073,3 +2072,20 @@ async function transferOnSolana(tokenMintAddress, from, to, price, nft_id) {
 
 }
 
+   
+   
+
+  
+  
+function royalty(id) {
+  db.getConnection( async(err, connection) => {
+    const sql_ask = "SELECT secondary_price, royalty from lazymintednfts where id=?"
+    const sql_query = mysql.format(sql_ask, id)
+    await connection.query(sql_query, async(err,result)=> {
+      connection.release()
+      if (err) throw (err)
+      const for_original_creator = secondary_price*royalty/100
+
+    })
+  })
+}

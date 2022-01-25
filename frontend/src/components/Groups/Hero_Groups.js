@@ -14,10 +14,11 @@ class Hero extends React.Component {
               <h3 className="text-secondary my-2">
                 Merchandise, Hape Beast and much more
               </h3>
-              {!!localStorage.getItem["user_id"] &&
+              {localStorage.getItem('x-access-token') && localStorage.getItem('user_id') ?
               <button onClick={() => window.location.href="/assets"} className="btn btn-lg my-4 mx-3" style={{borderRadius: "10px", width: "200px", border: "1px solid #1b1b1b", background: "#2c3539"}}>
                 View Your Groups
-              </button>}
+              </button>
+              : null}
             </div>
             <div className="col-xl-4 d-flex justify-content-center">
               <img

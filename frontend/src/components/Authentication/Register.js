@@ -51,7 +51,7 @@ class Register extends React.Component {
 
     event.preventDefault();
     const { email, password, confirmpassword, isKYCdone, fullname, contact_number, is_email_verified, is_contactnumber_verified } = this.state;
-    if (password === confirmpassword) {
+    if (password === confirmpassword & contact_number[0]=="+") {
       localStorage.clear();
       localStorage.setItem('email', this.state.email);
       fetch('http://localhost:3001/createUser', {
@@ -76,7 +76,7 @@ class Register extends React.Component {
         // window.location.href = "/otp";
     }
     else {
-      alert('Not Submitting responses... Password and ConfirmPassword field should match');
+      alert('Not Submitting responses... Password and ConfirmPassword field should match and mobile number should start with +91 country code');
     }
   };
   render() {

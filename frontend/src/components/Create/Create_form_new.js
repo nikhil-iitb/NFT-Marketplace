@@ -224,7 +224,7 @@ function Create_form_new(){
                     name="price"
                     onChange={e => updateFormInput({ ...formInput, price: e.target.value })}
                     // value={this.state.price}
-                    placeholder="Collection name"
+                    placeholder="Price"
                     style={{
                       width: "100%",
                       backgroundColor: "#2c3136",

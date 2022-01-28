@@ -50,15 +50,17 @@ function Create_form_new(){
   }
 
   async function handleUpload(){
-    alert("Are you sure to upload this file on IPFS, once it is uploaded click on Create NFT")
+    alert("Are you sure to upload this file, once it is uploaded click on Create NFT")
     const fileInput = document.querySelector('input[type="file"]');
+    const name = fileInput.name;
     const fileforupload = fileInput.files;
     try {
       const cid = await client.put(fileforupload);
       console.log("Your file has been uploaded on Filecoin");
       console.log("Your cid is: " + cid);
       let metadata = {
-        "image": "ipfs://"+cid,
+        // "image": "ipfs://"+cid,
+        "image": "https://" + cid + ".ipfs.dweb.link/" + name,
         "collectionName": formInput.collectionName,
         "name": formInput.name,
         "description": formInput.description,
@@ -67,7 +69,8 @@ function Create_form_new(){
 
       const cid_metadata = await client.put(blob);
       console.log("Your cid is: " + cid_metadata);
-      updatefileIpfs("ipfs://"+cid_metadata)
+      // updatefileIpfs("ipfs://"+cid_metadata)
+      updatefileIpfs("https://" + cid_metadata + ".ipfs.dweb.link/")
       setUploaded(true)
     } catch (error) {
       console.log("Error uploading the file: ", error);

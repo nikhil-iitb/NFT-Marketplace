@@ -604,13 +604,12 @@ class NFT_Hero extends React.Component {
       "http://localhost:3001/purchase/" +
       nft_id +
       "/" + localStorage.getItem("user_id") + "/" + this.state.returnednft.owner_user_id+"/"+this.state.returnednft.user_id;
-    trackPromise(
+    await trackPromise(
       fetch(apiURL)
         .then((res) => res.json())
         .then((result) => {
           console.log("Here is the status of transfer");
           console.log(result);
-          window.location.href = "/";
         })
         .catch((err) => {
           alert(
@@ -619,6 +618,7 @@ class NFT_Hero extends React.Component {
           console.log("Error");
         })
     );
+    window.location.href = "/";
   };
 
   componentDidMount = async () => {
@@ -856,7 +856,7 @@ class NFT_Hero extends React.Component {
                     <div className="row">
                       <span className="text-start col-8">Contract Address</span>
                       <span className="text-end text-primary col-4">
-                        0xby...76
+                        {returnednft.public_mint_address}
                       </span>
                     </div>
                     <div className="row">
@@ -868,13 +868,13 @@ class NFT_Hero extends React.Component {
                     <div className="row">
                       <span className="text-start col-8">Token Standard</span>
                       <span className="text-end text-secondary col-4">
-                        ERC-721
+                        {returnednft.blockchain == "Solana" ? <span>Metaplex</span> : <span>ERC - 721</span>}
                       </span>
                     </div>
                     <div className="row">
                       <span className="text-start col-8">Blockchain</span>
                       <span className="text-end text-secondary col-4">
-                        Ethereum
+                        {returnednft.blockchain}
                       </span>
                     </div>
                     <div className="row">

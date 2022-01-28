@@ -935,9 +935,8 @@ app.get("/fetchcomment/:group_id/:webpage_id", (req, res) => {
     sql_ask = "SELECT * FROM comments_table INNER JOIN likes_counter ON comments_table.comment_id = likes_counter.comment_id WHERE comments_table.Group_id=? AND comments_table.webpage_id=?";
     sql_query = mysql.format(sql_ask, [req.params.group_id, req.params.webpage_id])
     connection.query(sql_query, (err, result1) => {
-
-      if (err) throw err;
       connection.release();
+      if (err) throw err;
       if (!err) {
         res.send(result1);
         console.log("Comments & Likes fetched")
@@ -982,7 +981,7 @@ app.get("/fetchimages/:group_id/:webpage_id", (req, res) => {
 app.get("/list", (req, res) => {
   console.log(refreshTokens);
 });
-app.post("/like/:comment_id", (req, res) => {
+app.get("/like/:comment_id", (req, res) => {
   const comment_id = Number(req.params.comment_id);
   var new_likes = 0;
   db.getConnection(async (err, connection) => {
@@ -1890,6 +1889,7 @@ app.get("/purchase/:nft_id/:user_id_buyer/:user_id_seller/:user_id_creator", (re
       let data_nft = result[0]
       let data_buyer = {}
       let data_seller = {}
+      let data_creator = {}
 
       // getting info of buyer:
       db.getConnection(async (err, connection) => {
@@ -1911,8 +1911,9 @@ app.get("/purchase/:nft_id/:user_id_buyer/:user_id_seller/:user_id_creator", (re
             await connection.query(SQLQUERY, (err, result) => {
               connection.release();
               if (err) throw err;
-              data_buyer = result[0]
-              let private_key_string = data_buyer.wallet_private_key;
+              data_creator = result[0]
+              console.log("data_creator"+data_creator)
+              let private_key_string = data_creator.wallet_private_key;
               let user_private_key = private_key_string.split(",").map(Number);
               secretKey = Uint8Array.from(user_private_key);
     
@@ -1927,7 +1928,7 @@ app.get("/purchase/:nft_id/:user_id_buyer/:user_id_seller/:user_id_creator", (re
               if (err) throw err;
               data_seller = result[0]
               if(data_nft.primary_sale_done == 1) {
-                royalty(data_buyer, data_seller, keypair_creator, data_nft.id)
+                royalty(data_buyer, data_seller, data_creator, data_nft.id)
               }
               else{
               let keypair = verifyMintingSignature(data_nft, data_seller)
@@ -2119,7 +2120,7 @@ async function transferOnSolana(tokenMintAddress, from, to, price, nft_id, to_us
     console.log("SIGNATURE", signature);
     console.log(" SENT TO FROM.pub_key: SUCCESS");
 
-    db.getConnection(async (err, connection) => {
+    db.getConnection(async (err, connection1) => {
       const sql_ask =
         "UPDATE lazymintednfts SET primary_sale_done=?, owner=?, owner_user_id=?, public_mint_address=?, available_for_sale=? WHERE id = ?";
 
@@ -2132,27 +2133,42 @@ async function transferOnSolana(tokenMintAddress, from, to, price, nft_id, to_us
         nft_id,
       ]);
 
-      await connection.query(sql_query_new, async (err, result) => {
-        connection.release();
+      await connection1.query(sql_query_new, async (err, result) => {
+        connection1.release();
         if (err) throw err;
         if (!err) {
           console.log("successfully manipulated the lazymintednfts table");
           if (is_secondary == 1)
           {
-            var newtransaction1  = await new web3.Transaction().add(
-              web3.SystemProgram.transfer({
-                fromPubkey: to.publicKey,
-                toPubkey: original_creator.publicKey,
-                lamports: Number(royalty) * web3.LAMPORTS_PER_SOL,
-              })
-            );
+          //     var newtransaction1  = await new web3.Transaction().add(
+          //     web3.SystemProgram.transfer({
+          //     fromPubkey: to.publicKey,
+          //     toPubkey: original_creator.publicKey,
+          //     lamports: Number(royalty) * web3.LAMPORTS_PER_SOL,
+          //     })
+          //   );
         
-            var signature1 = await web3.sendAndConfirmTransaction(
-              connection,
-              newtransaction1,
-              [to],
-              { commitment: "confirmed" }
-            );
+          //  var signature1 = await web3.sendAndConfirmTransaction(
+          //     connection,
+          //     newtransaction1,
+          //     [to],
+          //     { commitment: "confirmed" }
+          //   );
+
+          var newtransaction1 = await new web3.Transaction().add(
+            web3.SystemProgram.transfer({
+              fromPubkey: to.publicKey,
+              toPubkey: original_creator.publicKey,
+              lamports: Number(royalty) * web3.LAMPORTS_PER_SOL,
+            })
+          );
+      
+          var signature1 = await web3.sendAndConfirmTransaction(
+            connection,
+            newtransaction1,
+            [to],
+            { commitment: "confirmed" }
+          );
             console.log("Royalty SIGNATURE", signature1);
             console.log(" SENT Royalty TO FROM.pub_key: SUCCESS")
           }
@@ -2163,6 +2179,9 @@ async function transferOnSolana(tokenMintAddress, from, to, price, nft_id, to_us
 
 
 }
+//#2 created nft
+//#3 bought it and listed for sale
+
 
 app.post(
   "/secondarysale/:id",
@@ -2190,18 +2209,25 @@ app.post(
 
   
   
-function royalty(data_buyer, data_seller, keypair_original_creator, id) {
+function royalty(data_buyer, data_seller, data_creator, id) {
   let private_key_string = data_seller.wallet_private_key;
   let user_private_key = private_key_string.split(",").map(Number);
-  secretKey = Uint8Array.from(user_private_key);
+  let secretKey = Uint8Array.from(user_private_key);
 
   let mykeypair = Keypair.fromSecretKey(secretKey);
 
   let private_key_string1 = data_buyer.wallet_private_key;
   let user_private_key1 = private_key_string1.split(",").map(Number);
-  secretKey1 = Uint8Array.from(user_private_key1);
+  let secretKey1 = Uint8Array.from(user_private_key1);
 
   let keypair_buyer = Keypair.fromSecretKey(secretKey1);
+
+  let private_key_string2 = data_creator.wallet_private_key;
+  let user_private_key2 = private_key_string2.split(",").map(Number);
+  let secretKey2 = Uint8Array.from(user_private_key2);
+
+  let keypair_original_creator = Keypair.fromSecretKey(secretKey2);
+  console.log("Keypair original creator"+keypair_original_creator.publicKey)
 
   db.getConnection( async(err, connection) => {
     const sql_ask = "SELECT * from lazymintednfts where id=?"
@@ -2214,6 +2240,7 @@ function royalty(data_buyer, data_seller, keypair_original_creator, id) {
       console.log(royaltyprice)
       const price = result[0].secondary_price - royaltyprice
       let to_user_id = data_buyer.user_id
+      console.log("to_user_id: "+to_user_id)
       const public_mint_address = result[0].public_mint_address
       console.log(public_mint_address)
       transferOnSolana(public_mint_address, mykeypair, keypair_buyer, price, id , to_user_id, 1, keypair_original_creator, royaltyprice )

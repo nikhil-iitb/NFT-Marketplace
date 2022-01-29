@@ -1284,41 +1284,45 @@ app.get("/fetchnfts/:group_id", (req, res) => {
         group = result1[0];
         collection_name = group.collection_name;
         group_name = group.Group_name;
-        const sql_ask = "SELECT * FROM nftowners WHERE collection_name = ?";
+        const sql_ask = "SELECT * FROM lazymintednfts WHERE collectionName = ?";
         const sql_query_new = mysql.format(sql_ask, [collection_name]);
         await connection.query(sql_query_new, async (err, result) => {
-          if (err) {
-            // throw (err);
-            console.log(err);
-            console.log("No nft found");
-          }
-          if (result.length === 0) {
-            connection.release();
-            if (err) throw (err);
-            else {
-              console.log("Group info fetched");
-              res.send({ group: group });
-            }
-          }
-          for (var i = 0; i < result.length; i++) {
-            nft_ids[i] = result[i].idnfts_created;
-          }
-          if (nft_ids.length > 0) {
-            const sql_ask_new =
-              "SELECT * FROM nfts_created WHERE idnfts_created IN (?)";
-            const SQLQUERY = mysql.format(sql_ask_new, [nft_ids]);
-            await connection.query(SQLQUERY, (err, result) => {
-              connection.release();
-              if (err) throw err;
-              if (!err) {
-                console.log("Great! NFTs of a particular group are fetched");
-                res.send({ nft: result, group: group });
-                // res.send(result)
-              }
-            });
-          } else {
-            console.log("No nft of this collection");
-          }
+          connection.release()
+          if (err) throw (err)
+          res.send({ nft: result, group: group });
+          // if (err) {
+          //   // throw (err);
+          //   console.log(err);
+          //   console.log("No nft found");
+          // }
+          // if (result.length === 0) {
+          //   connection.release();
+          //   if (err) throw (err);
+          //   else {
+          //     console.log("Group info fetched");
+          //     res.send({ group: group });
+          //   }
+          // }
+          // for (var i = 0; i < result.length; i++) {
+          //   nft_ids[i] = result[i].idnfts_created;
+          // }
+          // if (nft_ids.length > 0) {
+          //   const sql_ask_new =
+          //     // "SELECT * FROM nfts_created WHERE idnfts_created IN (?)";
+          //     "SELECT * FROM lazymintednfts WHERE idnfts_created IN (?)";
+          //   const SQLQUERY = mysql.format(sql_ask_new, [nft_ids]);
+          //   await connection.query(SQLQUERY, (err, result) => {
+          //     connection.release();
+          //     if (err) throw err;
+          //     if (!err) {
+          //       console.log("Great! NFTs of a particular group are fetched");
+          //       res.send({ nft: result, group: group });
+          //       // res.send(result)
+          //     }
+          //   });
+          // } else {
+          //   console.log("No nft of this collection");
+          // }
         });
       }
     });
@@ -1934,12 +1938,13 @@ app.get("/purchase/:nft_id/:user_id_buyer/:user_id_seller/:user_id_creator", (re
               let keypair = verifyMintingSignature(data_nft, data_seller)
               if (keypair !== false) {
                 console.log("reached inside true bool")
+                res.send("fine")
                 if (data_nft.blockchain === 'Solana') {
                   let res = mintNFTonSolana(keypair, data_nft.id, data_nft.price, keypair_buyer, user_id_buyer)
                   // console.log("after minting", res)
                 }
                 else{
-                  let res = mintTokenEth(data_seller.matic_wallet_pub_key, data_seller.matic_wallet_private_key, data_nft.ipfs_url_metadata, data_buyer.matic_wallet_pub_key, data_nft.id, data_buyer.matic_wallet_private_key, data_nft.price)
+                  let res = mintTokenEth(data_seller.matic_wallet_pub_key, data_seller.matic_wallet_private_key, data_nft.ipfs_url_metadata, data_buyer.matic_wallet_pub_key, data_nft.id, data_buyer.matic_wallet_private_key, data_nft.price, data_buyer.user_id)
                 }
               }
             }
@@ -2251,7 +2256,7 @@ function royalty(data_buyer, data_seller, data_creator, id) {
 
 // function to mint token on ethereum
 
-const mintTokenEth = async (address, privateKey, metadataUri, toAddress, nft_id, to_privateKey, price) => {
+const mintTokenEth = async (address, privateKey, metadataUri, toAddress, nft_id, to_privateKey, price, owner_user_id) => {
   const Web3 = require('web3');
 const {infura_provider, contractAbi, contractAddress} = require('./ContractInfo.js');
   const web3 = new Web3(infura_provider);
@@ -2281,14 +2286,14 @@ const {infura_provider, contractAbi, contractAddress} = require('./ContractInfo.
   const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
   console.log(`Transaction hash for minting: ${receipt.transactionHash}`);
   const tokenNum =  await myContract.methods.get().call();
-  transferTokenEth(address, toAddress, privateKey, tokenNum, nft_id, to_privateKey, price)
+  transferTokenEth(address, toAddress, privateKey, tokenNum, nft_id, to_privateKey, price, owner_user_id)
 //   return receipt.transactionHash
 }
 
 
 
 // function to transfer token on ethereum
-const transferTokenEth = async (address, toAddress, privateKey, tokenId, nft_id, to_privateKey, price) => {
+const transferTokenEth = async (address, toAddress, privateKey, tokenId, nft_id, to_privateKey, price, owner_user_id) => {
   const Web3 = require('web3');
 const {infura_provider, contractAbi, contractAddress} = require('./ContractInfo.js');
   const web3 = new Web3(infura_provider);
@@ -2337,11 +2342,14 @@ const {infura_provider, contractAbi, contractAddress} = require('./ContractInfo.
 
   db.getConnection(async (err, connection) => {
     const sql_ask =
-      "UPDATE lazymintednfts SET primary_sale_done=?, owner=? WHERE id = ?";
-
+      "UPDATE lazymintednfts SET primary_sale_done=?, owner=?, owner_user_id=?, public_mint_address=?, available_for_sale=? WHERE id = ?";
+//Public mint address corresponds to token_id when blockchain=ethereum
     const sql_query_new = mysql.format(sql_ask, [
       1,
       toAddress,
+      owner_user_id,
+      tokenId,
+      0,
       nft_id
     ]);
 

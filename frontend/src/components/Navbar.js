@@ -112,13 +112,13 @@ class Navbar extends React.Component {
           </button>
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <form className="d-flex mx-auto">
-              <input
+              {/* <input
                 className="form-control me-2"
                 type="search"
                 placeholder="Search Electroshoe"
                 aria-label="Search"
                 style={{ width: "150%", backgroundColor: "#212529" }}
-              />
+              /> */}
             </form>
             <ul className="navbar-nav mb-2 mb-lg-0 ">
               <li className="nav-item">

@@ -3,6 +3,32 @@ import "../Homepage/NFT_slider.css";
 import ReactTooltip from "react-tooltip";
 
 class Club_slider extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+        group_id: 0, returnednfts: [], group_name: ''
+    }
+}
+
+componentDidMount = async() => {
+    let currentURL = window.location.href;
+    let group_id = Number(currentURL.split('=')[1])
+    this.setState({
+        group_id: group_id
+    })
+
+    const api_url = "http://localhost:3001/fetchnfts/"+group_id;
+    await fetch(api_url).then(res => res.json())
+    .then((result) => {
+        console.log(result.group_name)
+        console.log(result.result)
+        this.setState({
+            returnednfts: result.result,
+            group_name: result.group_name
+        })
+        // this.setState(result)
+    })
+}
   render() {
     return (
       <section id="team" className="team">
@@ -16,12 +42,12 @@ class Club_slider extends React.Component {
             {this.props.nfts.map((item) => (
               <div
                 className="col-lg-4 col-md-6 d-flex align-items-stretch"
-                key={item.idnfts_created}
+                key={item.id}
               >
                 <div className="member">
                   <div className="member-img d-flex align-items-center">
                     <img
-                      src={item.fileUrl_onIPFS}
+                      src={item.image}
                       className="img-fluid"
                       alt=""
                       style={{ width: "100%", cursor: "pointer" }}
@@ -42,14 +68,14 @@ class Club_slider extends React.Component {
                       style={{ cursor: "pointer" }}
                       onClick={() =>
                         (window.location.href =
-                          "/nft-home?nft_id=" + item.idnfts_created)
+                          "/nft-home?nft_id=" + item.id)
                       }
                     >
                       {item.name_of_nft}
                     </h4>
                     <h4 className="col-6 text-end">{item.price} ◎</h4>
                     <span className="col-6 text-start">
-                      {item.description_of_nft}
+                      {item.description}
                     </span>
                     <span className="lead col-6 text-end">
                       <i class="uil uil-heart-alt" /> {item.no_of_likes}

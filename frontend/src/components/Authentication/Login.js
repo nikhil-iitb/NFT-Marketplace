@@ -42,7 +42,7 @@ handleSubmit = async(event) => {
   localStorage.setItem('x-access-token-expiration', Date.now() + 60 * 60 * 1000)
   localStorage.setItem('user_id', result.userId);
   alert("Successfully logged in")
-  window.location.href= "/assets" ;
+  window.location.href= "/" ;
   console.log("Redirected");
   }).catch((err) => {
       console.log(err)

@@ -270,7 +270,7 @@ function Create_form_new(){
                     name="price"
                     onChange={e => updateFormInput({ ...formInput, blockchain: e.target.value })}
                     // value={this.state.blockchain}
-                    placeholder="Polygon OR Solana"
+                    placeholder="Ethereum OR Solana"
                     style={{
                       width: "100%",
                       backgroundColor: "#2c3136",

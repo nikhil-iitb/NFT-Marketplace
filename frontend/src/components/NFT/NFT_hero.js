@@ -591,14 +591,14 @@ class NFT_Hero extends React.Component {
       wallet_pub = this.state.user.matic_wallet_pub_key
     }
     alert(
-      "Please visit https://www.simplex.com/buy-crypto and make sure you have " +
-      this.state.returnednft.price + this.state.returnednft.blockchain +
+      "Please visit https://www.simplex.com/buy-crypto and make sure you have amount equal to price in" +
+      this.state.returnednft.blockchain +
       " in your wallet. Your wallet's public address is " +
       wallet_pub +
       ". Click OK and you will be redirected to the website. Once you are done, come back and click Ok on another alert"
     );
     window.open("https://www.simplex.com/buy-crypto");
-    alert("Are you done?");
+    alert("Are you done? Once you click OK, NFT transfer will occur. Please be patient, it takes approx 1 minute for the transaction to get completed. On successful transaction, your purchased NFT would be visible in your Profile section where you can list it for secondary sale");
         // "/" + localStorage.getItem("user_id") + "/" + this.state.returnednft.user_id;
     const apiURL =
       "http://localhost:3001/purchase/" +
@@ -610,15 +610,17 @@ class NFT_Hero extends React.Component {
         .then((result) => {
           console.log("Here is the status of transfer");
           console.log(result);
+
         })
         .catch((err) => {
-          alert(
-            "Transfer could not occur. Make sure you have enough balance in your wallet to buy this NFT. Contact us if you are facing issues"
-          );
+          console.log(err)
+          // alert(
+          //   "Transfer could not occur. Make sure you have enough balance in your wallet to buy this NFT. Contact us if you are facing issues"
+          // );
+          alert("NFT will be visible in your profile section if the transaction was successful. If you don't see NFT in profile section after a minute, and your wallet had enough balance, do contact us")
           console.log("Error");
         })
     );
-    window.location.href = "/";
   };
 
   componentDidMount = async () => {
@@ -856,7 +858,11 @@ class NFT_Hero extends React.Component {
                     <div className="row">
                       <span className="text-start col-8">Contract Address</span>
                       <span className="text-end text-primary col-4">
-                        {returnednft.public_mint_address}
+                        {returnednft.blockchain=="Solana" ? 
+                        <span>{returnednft.public_mint_address}</span>
+                        :
+                        <span>0xEB79Ee35075B792bA4Fb8adaC139A4BB225AB84B</span>
+                        }
                       </span>
                     </div>
                     <div className="row">

@@ -1,5 +1,6 @@
 import React from 'react';
 import Profile_slider from './Profile_slider';
+import Created_Profile_slider from './Created_Profile_slider';
 import "./Profile_Hero.css";
 
 class Profile_Hero extends React.Component {
@@ -97,6 +98,7 @@ class Profile_Hero extends React.Component {
 
               </div>
               <hr style={{ color: "#7f8082", border: "2px solid", padding: "0" }} />
+            <Created_Profile_slider user = {this.state.user.user_id}/>
             <Profile_slider user = {this.state.user.user_id}/>
             </div>
           </>

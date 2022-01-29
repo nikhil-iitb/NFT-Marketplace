@@ -18,8 +18,9 @@ function makeStorageClient() {
 const client = makeStorageClient();
  
 function Create_form_new(){
-  const [formInput, updateFormInput] = useState({ image:'', collectionName: '', name: '', description: '', price:'', blockchain:'' })
+  const [formInput, updateFormInput] = useState({ image:'', collectionName: '', name: '', description: '', price:'', royalty:'', blockchain:'' })
   const [fileIpfs, updatefileIpfs] = useState("");
+  const [uploaded_ipfs, setUploaded] = useState(false)
   const imageHandler = async (e) => {
  
     if(e.target.files.length > 0) {
@@ -49,14 +50,17 @@ function Create_form_new(){
   }
 
   async function handleUpload(){
+    alert("Are you sure to upload this file, once it is uploaded click on Create NFT")
     const fileInput = document.querySelector('input[type="file"]');
+    const name = fileInput.name;
     const fileforupload = fileInput.files;
     try {
       const cid = await client.put(fileforupload);
       console.log("Your file has been uploaded on Filecoin");
       console.log("Your cid is: " + cid);
       let metadata = {
-        "image": "ipfs://"+cid,
+        // "image": "ipfs://"+cid,
+        "image": "https://" + cid + ".ipfs.dweb.link/" + name,
         "collectionName": formInput.collectionName,
         "name": formInput.name,
         "description": formInput.description,
@@ -65,7 +69,9 @@ function Create_form_new(){
 
       const cid_metadata = await client.put(blob);
       console.log("Your cid is: " + cid_metadata);
-      updatefileIpfs("ipfs://"+cid_metadata)
+      // updatefileIpfs("ipfs://"+cid_metadata)
+      updatefileIpfs("https://" + cid_metadata + ".ipfs.dweb.link/")
+      setUploaded(true)
     } catch (error) {
       console.log("Error uploading the file: ", error);
     }
@@ -73,7 +79,8 @@ function Create_form_new(){
   }
 
 
-  async function handleSubmit(){
+  async function handleSubmit(event){
+    event.preventDefault();
     const user = localStorage.getItem("user_id")
     //TODO - get user id from localstorage
     // const user = 3;
@@ -86,6 +93,7 @@ function Create_form_new(){
     formData.append("blockchain", formInput.blockchain);
     formData.append("user_id", user);
     formData.append("ipfs_url", fileIpfs);
+    formData.append("royalty", formInput.royalty);
     
     
       await fetch("http://localhost:3001/store_lazyMintedNFTs", {
@@ -104,7 +112,7 @@ function Create_form_new(){
       .catch((error) => {
         console.error(error);
       });
-  
+  window.location.href="/"
     
   }
  
@@ -235,6 +243,25 @@ function Create_form_new(){
                   />
                 </div>
                 <div>
+                  <h6 className="pt-2 me-5 text-start text-white">Royalty</h6>
+                  <small>Set the Royalty at which you want to list the NFT</small>
+                  <input
+                    type="text"
+                    className="p-2"
+                    name="royalty"
+                    onChange={e => updateFormInput({ ...formInput, royalty: e.target.value })}
+                    // value={this.state.price}
+                    placeholder="Royalty"
+                    style={{
+                      width: "100%",
+                      backgroundColor: "#2c3136",
+                      height: "40px",
+                      borderRadius: "10px",
+                      color: "#fff",
+                    }}
+                  />
+                </div>
+                <div>
                   <h6 className="pt-2 me-5 text-start text-white">Blockchain</h6>
                   <small>Choose the blockchain where you want your NFT to be minted.</small>
                   <input
@@ -254,7 +281,7 @@ function Create_form_new(){
                   />
                 </div>
  
-                
+                {uploaded_ipfs == true ?
                 <button
                   type="submit"
                   className="btn btn-primary btn-lg my-2 border border-dark"
@@ -262,6 +289,7 @@ function Create_form_new(){
                 >
                   Create NFT
                 </button>
+                :null}
               </form>
               <button
                   // type="submit"
@@ -269,7 +297,7 @@ function Create_form_new(){
                   style={{ borderRadius: "10px", width: "200px" }}
                   onClick={handleUpload}
                 >
-                  Upload Files
+                  Upload File
                 </button>
             </div>
           </div>

@@ -477,7 +477,7 @@ import { Connection, clusterApiUrl, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import bs58 from "bs58";
 import { usePromiseTracker } from "react-promise-tracker";
 import { trackPromise } from "react-promise-tracker";
- 
+
 class NFT_Hero extends React.Component {
   constructor(props) {
     super(props);
@@ -489,18 +489,51 @@ class NFT_Hero extends React.Component {
       fileUrl_onIPFS: "",
       user_id: 0,
       price: 0,
+      secondaryprice: 0,
       returnednft: [],
       creator: [],
       balance: 0,
       sol_inr: 0,
       priceininr: 0,
+      priceininr_secondary: 0,
     };
     this.getCreator = this.getCreator.bind(this);
     this.buy = this.buy.bind(this);
     this.getUser = this.getUser.bind(this);
-    // this.getBalance = this.getBalance.bind(this);
+    this.getBalance = this.getBalance.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
- 
+
+
+  handleChange (event) {
+    const target = event.target;
+    const name = target.name;
+    const value = target.value;
+    this.setState({
+      [name]: value,
+    });
+  }
+
+  handleSubmit(event) {
+    event.preventDefault();
+    alert("Are you sure you want to list it for the secondary sale?")
+    const api_url = "http://localhost:3001/secondarysale/"+this.state.returnednft.id
+    fetch(api_url, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(this.state),
+    })
+      .then((res) => res.json())
+      .then((result) => {
+        console.log(result);
+      })
+      .catch((err) => console.log(err));
+      // window.location.href = "/"
+  };
+
   getUser = async () => {
     const user_id = localStorage.getItem("user_id");
     //todo
@@ -514,7 +547,7 @@ class NFT_Hero extends React.Component {
         });
       });
   };
- 
+
   getCreator = async (user_id) => {
     //todo
     const api_url = "http://localhost:3001/getEmail/" + user_id;
@@ -527,14 +560,14 @@ class NFT_Hero extends React.Component {
         });
       });
   };
- 
+
   getBalance = async (publicKey) => {
     console.log("Welcome to getBalance function: " + bs58.decode(publicKey));
     const createConnection = () => {
       return new Connection(clusterApiUrl("devnet"));
     };
     const connection = createConnection();
- 
+
     const lamports = await connection
       .getBalance(bs58.decode(publicKey))
       .catch((err) => {
@@ -548,35 +581,35 @@ class NFT_Hero extends React.Component {
       balance: lamports / LAMPORTS_PER_SOL,
     });
   };
- 
+
   buy = async (nft_id) => {
     let wallet_pub = ""
-    if (this.state.returnednft.blockchain == 'Solana'){
+    if (this.state.returnednft.blockchain == 'Solana') {
       wallet_pub = this.state.user.wallet_pub_key
     }
-    else{
+    else {
       wallet_pub = this.state.user.matic_wallet_pub_key
     }
     alert(
       "Please visit https://www.simplex.com/buy-crypto and make sure you have " +
-        this.state.returnednft.price + this.state.returnednft.blockchain + 
-        " in your wallet. Your wallet's public address is " +
-        wallet_pub +
-        ". Click OK and you will be redirected to the website. Once you are done, come back and click Ok on another alert"
+      this.state.returnednft.price + this.state.returnednft.blockchain +
+      " in your wallet. Your wallet's public address is " +
+      wallet_pub +
+      ". Click OK and you will be redirected to the website. Once you are done, come back and click Ok on another alert"
     );
     window.open("https://www.simplex.com/buy-crypto");
     alert("Are you done?");
+        // "/" + localStorage.getItem("user_id") + "/" + this.state.returnednft.user_id;
     const apiURL =
       "http://localhost:3001/purchase/" +
       nft_id +
-      "/" + localStorage.getItem("user_id")+"/" + this.state.returnednft.user_id;
-    trackPromise(
+      "/" + localStorage.getItem("user_id") + "/" + this.state.returnednft.owner_user_id+"/"+this.state.returnednft.user_id;
+    await trackPromise(
       fetch(apiURL)
         .then((res) => res.json())
         .then((result) => {
           console.log("Here is the status of transfer");
           console.log(result);
-          window.location.href = "/";
         })
         .catch((err) => {
           alert(
@@ -585,8 +618,9 @@ class NFT_Hero extends React.Component {
           console.log("Error");
         })
     );
+    window.location.href = "/";
   };
- 
+
   componentDidMount = async () => {
     this.nft_id = Number(window.location.href.split("=")[1]);
     await this.getUser();
@@ -602,7 +636,7 @@ class NFT_Hero extends React.Component {
             returnednft: result,
           });
           this.getCreator(result.user_id);
-          const url = "http://localhost:3001/soltoinr/"+result.blockchain;
+          const url = "http://localhost:3001/soltoinr/" + result.blockchain;
           fetch(url)
             .then((res) => res.json())
             .then(
@@ -618,6 +652,8 @@ class NFT_Hero extends React.Component {
                 this.setState({
                   priceininr:
                     Number(this.state.returnednft.price) * this.state.sol_inr,
+                  priceininr_secondary:
+                    Number(this.state.returnednft.secondary_price) * this.state.sol_inr,
                 });
                 console.log(this.state.priceininr);
               },
@@ -634,7 +670,7 @@ class NFT_Hero extends React.Component {
     console.log("This is what I received: ");
     console.log(this.state);
   };
- 
+
   render() {
     const returnednft = this.state.returnednft;
     console.log(this.state);
@@ -820,7 +856,7 @@ class NFT_Hero extends React.Component {
                     <div className="row">
                       <span className="text-start col-8">Contract Address</span>
                       <span className="text-end text-primary col-4">
-                        0xby...76
+                        {returnednft.public_mint_address}
                       </span>
                     </div>
                     <div className="row">
@@ -832,13 +868,13 @@ class NFT_Hero extends React.Component {
                     <div className="row">
                       <span className="text-start col-8">Token Standard</span>
                       <span className="text-end text-secondary col-4">
-                        ERC-721
+                        {returnednft.blockchain == "Solana" ? <span>Metaplex</span> : <span>ERC - 721</span>}
                       </span>
                     </div>
                     <div className="row">
                       <span className="text-start col-8">Blockchain</span>
                       <span className="text-end text-secondary col-4">
-                        Ethereum
+                        {returnednft.blockchain}
                       </span>
                     </div>
                     <div className="row">
@@ -870,13 +906,15 @@ class NFT_Hero extends React.Component {
               <div className="d-flex text-secondary">
                 <div className="me-2">
                   Owned by{" "}
+                  {/* {this.state.owner_user_id} */}
                   {/* <a href={"/profile?user=" + this.state.creator.user_id}> */}
-                    {this.state.returnednft.user_id}
+                  {/* Created by{" "} */}
+                  {this.state.creator.wallet_pub_key}
                   {/* </a> */}
                 </div>
                 <div className="me-2">
                   <i class="uil uil-eye me-1" />
-                  48.8K Views
+                  
                 </div>
                 <div className="me-2">
                   <i class="uil uil-heart me-1" />
@@ -900,39 +938,88 @@ class NFT_Hero extends React.Component {
                     className="px-2 w-100 text-start py-2 text-secondary"
                     style={{ backgroundColor: "#2c3136" }}
                   >
-                    <p>Lorem ipsum dolor sit amet.</p>
+                    {this.state.primary_sale_done == 1 ?
+                    <p>For Primary Sale</p>
+                    :
+                    <p>For Secondary Sale</p>
+                    }
                     <div className="d-flex text-white">
                       <img
                         alt="WETH"
                         src={eth}
                         style={{ height: "40px", margin: "0 15px" }}
                       />
+                      {this.state.returnednft.primary_sale_done == 0 ?
+                      <span>
                       <h4>{returnednft.price}</h4>
                       <span className="text-secondary mx-2 pt-1">
                         (₹ {this.state.priceininr})
                       </span>
+                      </span>
+                      :
+                      <span>
+                      <h4>{returnednft.secondary_price}</h4>
+                      <span className="text-secondary mx-2 pt-1">
+                        (₹ {this.state.priceininr_secondary})
+                      </span>
+                      </span>
+                      }
+
                     </div>
+                    
                     <div className="my-2">
-                      {this.state.user.user_id == this.state.creator.user_id ?
-                      <div className="w-100 bg-primary text-white text-center">
-                      <p>You own this NFT</p>
-                    </div> : (
-                      returnednft.is_sold ?
-                        <div className="w-100 bg-danger text-white text-center">
-                          <p>This NFT is sold</p>
-                        </div>
-                       :
-                        <button
-                          type="submit"
-                          onClick={() => {
-                            this.buy(nft_id);
+                      {this.state.user.user_id == this.state.creator.user_id || this.state.user.user_id == this.state.returnednft.owner_user_id ?
+                        <div className="w-100 bg-primary text-white text-center">
+                          <p>You own this NFT</p>
+                        </div> : (
+                          returnednft.is_sold ?
+                            <div className="w-100 bg-danger text-white text-center">
+                              <p>This NFT is sold</p>
+                            </div>
+                            :
+                            <button
+                              type="submit"
+                              onClick={() => {
+                                this.buy(nft_id);
+                              }}
+                              className="btn w-75 rounded-3 fw-bold fs-6"
+                              style={{ backgroundColor: "#2081e2" }}
+                            >
+                              <i class="uil uil-wallet mx-1"></i>Buy Now
+                            </button>
+                        )}
+                        {/* {localStorage.getItem('user_id') == this.state.returnednft.user_id ? <h1>True</h1> : <h1>False</h1>} */}
+                        {this.state.user.user_id == this.state.returnednft.owner_user_id && (localStorage.getItem('user_id') != this.state.returnednft.user_id)?
+                        <form onSubmit={this.handleSubmit}>
+                        <div>
+                        <h6 className="pt-2 me-5 text-start text-white">Price</h6>
+                        <small>Set the Price at which you want to list the NFT for secondary sale</small>
+                        <input
+                          type="text"
+                          className="p-2"
+                          name="secondaryprice"
+                          onChange={this.handleChange}
+                          value={this.state.secondaryprice}
+                          placeholder="Price"
+                          style={{
+                            width: "100%",
+                            backgroundColor: "#2c3136",
+                            height: "40px",
+                            borderRadius: "10px",
+                            color: "#fff",
                           }}
+                        />
+                      </div>
+                          <button
+                          type="submit"
                           className="btn w-75 rounded-3 fw-bold fs-6"
                           style={{ backgroundColor: "#2081e2" }}
                         >
-                          <i class="uil uil-wallet mx-1"></i>Buy Now
+                          <i class="uil uil-wallet mx-1"></i>List for secondary Sale
                         </button>
-                      )}
+                        </form>
+                        : null
+                      }
                     </div>
                   </div>
                 </div>
@@ -944,7 +1031,7 @@ class NFT_Hero extends React.Component {
     );
   }
 }
- 
+
 export default NFT_Hero;
- 
+
 

@@ -1,7 +1,7 @@
 import React from "react";
 import "../Homepage/NFT_slider.css";
 
-class Profile_slider extends React.Component {
+class Created_Profile_slider extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -13,7 +13,7 @@ class Profile_slider extends React.Component {
     // const user_id = localStorage.getItem("user_id");
     const user_id = Number(window.location.href.split("=")[1]);;
     console.log("user_id = ", user_id)
-    const api_url = "http://localhost:3001/fetch_profile_nfts/"+ user_id;
+    const api_url = "http://localhost:3001/fetch_profile_nfts_created/"+ user_id;
 
     fetch(api_url)
       .then((res) => res.json())
@@ -34,17 +34,15 @@ class Profile_slider extends React.Component {
       <section id="team" className="team">
         <div className="container">
           <div className="section-title">
-            <h2 className="text-white">NFTs Bought</h2>
+            <h2 className="text-white">NFTs Created</h2>
             <p className="text-secondary">See all NFTs here!</p>
           </div>
           <div className="row justify-content-center">
             {this.state.returned_nfts.map((item) => (
-              
               <div
                 className="col-lg-4 col-md-6 d-flex align-items-stretch"
                 key={item.id}
               >
-                {item.owner_user_id != item.user_id ?
                 <div className="member">
                   <div className="member-img d-flex align-items-center">
                     <img
@@ -83,9 +81,7 @@ class Profile_slider extends React.Component {
                     </span>
                   </div>
                 </div>
-                :null }
               </div>
-              
             ))}
           </div>
         </div>
@@ -94,4 +90,4 @@ class Profile_slider extends React.Component {
   }
 }
 
-export default Profile_slider;
+export default Created_Profile_slider;

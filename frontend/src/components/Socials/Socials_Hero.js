@@ -51,7 +51,7 @@ componentDidMount() {
 //   var currentURL = window.location.href;
 //   let both_ids = currentURL.split('=')[1];
 //   let group_id=Number(both_ids.split('&')[0]);
-//   const apiUrl = 'http://localhost:3001/fetchcomment/'+group_id+"/1";
+//   const apiUrl = 'http://localhost:3001/fetchcomment/'+this.state.group_id+this.state.webpage_id;
 //   fetch(apiUrl).then(res=> res.json())
 //   .then((result)=> {
 //     console.log("Fetched")
@@ -72,24 +72,19 @@ componentDidMount() {
 like =async (comment_id)=> {
 // const comment_id = props;
 this.setState({
-  liked_comment_id: comment_id
+  liked_comment_id: comment_id,
+  liked: 1
 })
 console.log("comment_id", comment_id)
 const apiUrl = "http://localhost:3001/like/"+comment_id;
-await fetch (apiUrl, {
-  method: "POST",
-  headers: {
-    "content-type": "application/json"
-  },
-  // body: JSON.stringify(this.state)
+fetch (apiUrl)
+.then((response) => {
+  response.json()
 })
-.then((response) => response.json())
 .then ((result) => {
   console.log(result);
 })
-this.setState({
-  liked: 1
-})
+window.location.reload(false)
 }
 
 handleChange(event) {
@@ -247,10 +242,12 @@ body: JSON.stringify(this.state)
               <div className="col-1 d-flex align-items-end text-white h5">
                 <div className="row">
                   <div className="col-12 col-lg-6">
-                    <i class="uil uil-thumbs-up" />
+                    <i class="uil uil-thumbs-up" onClick={
+                      ()=> this.like(item.comment_id)
+                      }/>
                   </div>
                   <div className="col-12 col-lg-6">
-                    <i class="uil uil-thumbs-down" />
+                    {item.No_of_likes}
                   </div>
                 </div>
               </div>

@@ -48,7 +48,7 @@ class Your_Groups_slider extends React.Component {
                     />
                   </div>
                   <div className="name">
-                    <p>{item.collection_name}</p>
+                    <p>{item.collectionName}</p>
                   </div>
                   <div className="h4">
                   <div className="social">

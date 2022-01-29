@@ -16,7 +16,7 @@ const https = require("https");
 const request = require("request-promise");
 const wallet = require('ethereumjs-wallet');
 // const sgMail = require('@sendgrid/email')
-
+// const {transferTokenEth, mintTokenEth} = require('./makeEthtx.js');
 
 
 const accountSid = "AC10475566a0ed3abd09eebbd13f2763fc";
@@ -1807,8 +1807,8 @@ app.post("/store_lazyMintedNFTs", upload.single("image"), (req, res) => {
 
       // inserting data in database
       db.getConnection(async (err, connection) => {
-        const sql_insert = "INSERT INTO lazymintednfts VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        const sql_query = mysql.format(sql_insert, [name, description, price, blockchain, image, collectionName, hash, public_key, 0, 0, user_id, fullFile, ipfs_url, "0", public_key]);
+        const sql_insert = "INSERT INTO lazymintednfts VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const sql_query = mysql.format(sql_insert, [name, description, price, blockchain, image, collectionName, hash, public_key, 0, 0, user_id, fullFile, ipfs_url, "0", public_key, 0]);
         const sql_ask = "SELECT id FROM lazymintednfts WHERE image = ?";
         const SQLQUERY = mysql.format(sql_ask, [image]);
         await connection.query(sql_query, async (err, result) => {
@@ -1877,7 +1877,7 @@ app.get("/purchase/:nft_id/:user_id_buyer/:user_id_seller", (req, res) => {
                   // console.log("after minting", res)
                 }
                 else{
-                  let res = mintEthNFT()
+                  let res = mintTokenEth(data_seller.matic_wallet_pub_key, data_seller.matic_wallet_private_key, data_nft.ipfs_url_metadata, data_buyer.matic_wallet_pub_key, data_nft.id, data_buyer.matic_wallet_private_key, data_nft.price)
                 }
               }
             });
@@ -2089,3 +2089,114 @@ function royalty(id) {
     })
   })
 }
+
+
+// function to mint token on ethereum
+
+const mintTokenEth = async (address, privateKey, metadataUri, toAddress, nft_id, to_privateKey, price) => {
+  const Web3 = require('web3');
+const {infura_provider, contractAbi, contractAddress} = require('./ContractInfo.js');
+  const web3 = new Web3(infura_provider);
+  const networkId = await web3.eth.net.getId();
+  const myContract = new web3.eth.Contract(
+    contractAbi,
+    contractAddress
+  );
+
+  const tx = myContract.methods.createToken(metadataUri);
+  const gas = await tx.estimateGas({from: address});
+  const gasPrice = await web3.eth.getGasPrice();
+  const data = tx.encodeABI();
+  const nonce = await web3.eth.getTransactionCount(address);
+
+  const signedTx = await web3.eth.accounts.signTransaction(
+    {
+      to: myContract.options.address, 
+      data,
+      gas,
+      gasPrice,
+      nonce, 
+      chainId: networkId
+    },
+    privateKey
+  );
+  const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+  console.log(`Transaction hash for minting: ${receipt.transactionHash}`);
+  const tokenNum =  await myContract.methods.get().call();
+  transferTokenEth(address, toAddress, privateKey, tokenNum, nft_id, to_privateKey, price)
+//   return receipt.transactionHash
+}
+
+
+
+// function to transfer token on ethereum
+const transferTokenEth = async (address, toAddress, privateKey, tokenId, nft_id, to_privateKey, price) => {
+  const Web3 = require('web3');
+const {infura_provider, contractAbi, contractAddress} = require('./ContractInfo.js');
+  const web3 = new Web3(infura_provider);
+  const networkId = await web3.eth.net.getId();
+  const myContract = new web3.eth.Contract(
+    contractAbi,
+    contractAddress
+  );
+
+  const tx = myContract.methods.transferFrom(address, toAddress, tokenId);
+  const gas = await tx.estimateGas({from: address});
+  const gasPrice = await web3.eth.getGasPrice();
+  const data = tx.encodeABI();
+  const nonce = await web3.eth.getTransactionCount(address);
+
+  const signedTx = await web3.eth.accounts.signTransaction(
+    {
+      to: myContract.options.address, 
+      data,
+      gas,
+      gasPrice,
+      nonce, 
+      chainId: networkId
+    },
+    privateKey
+  );
+  const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+  console.log(`Transaction hash: ${receipt.transactionHash}`);
+
+  // transfer money:
+
+  var value = web3.utils.toWei(price.toString(), 'ether')
+
+  var SignedTransaction = await web3.eth.accounts.signTransaction({
+        to : address,
+        value:value,
+        gas: 2000000,
+
+    }, to_privateKey)
+
+  web3.eth.sendSignedTransaction(SignedTransaction.rawTransaction).then(
+        (receipt)=>{
+            console.log(receipt)
+        })
+
+
+  db.getConnection(async (err, connection) => {
+    const sql_ask =
+      "UPDATE lazymintednfts SET primary_sale_done=?, owner=? WHERE id = ?";
+
+    const sql_query_new = mysql.format(sql_ask, [
+      1,
+      toAddress,
+      nft_id
+    ]);
+
+    await connection.query(sql_query_new, async (err, result) => {
+      // connection.release();
+      if (err) throw err;
+      if (!err) {
+        console.log("successfully manipulated the lazymintednfts table");
+
+      }
+    });
+  });
+  
+}
+
+

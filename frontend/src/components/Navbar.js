@@ -7,8 +7,10 @@ class Navbar extends React.Component {
   constructor(props) {
     super(props);
     this.setState({
-      publicKey_phantom: "",
-      publicKey_metamask: "",
+      matic_wallet_pub_key: "",
+      matic_wallet_private_key: '',
+      wallet_private_key: '',
+      wallet_pub_key: ''
     });
     this.connect_wallet = this.connect_wallet_phantom.bind(this);
     this.connect_wallet_metamask = this.connect_wallet_metamask.bind(this);
@@ -40,13 +42,27 @@ class Navbar extends React.Component {
     const accounts = await ethereum.request({ method: "eth_accounts" });
     //We take the first address in the array of addresses and display it
     console.log(accounts[0]);
+    // var wallet_pub_key = resp.publicKey.toString()
     this.setState({
-      publicKey_metamask: accounts[0],
+      matic_wallet_pub_key: accounts[0],
     });
     alert(
       "Successfully connected to Metamask Wallet, public key is " +
-        this.state.publicKey_metamask
+        this.state.matic_wallet_pub_key
     );
+    var matic_wallet_private_key = prompt("Please export your private key and paste it here", );
+    this.setState({
+      matic_wallet_private_key: matic_wallet_private_key
+    })
+    await fetch("http://localhost:3001/update_metamask/"+localStorage.getItem('user_id'), {
+      method: "POST",
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify(this.state)
+      }).
+    then((res) => res.json())
+    .then((result) => {console.log(result)}).catch((err) => console.log(err))
   };
 
   connect_wallet_phantom = async () => {
@@ -72,8 +88,11 @@ class Navbar extends React.Component {
       alert(
         "Your phantom wallet with public key " +
           resp.publicKey.toString() +
-          " has been successfully connected"
+          " has been successfully connected. Do you want to use it for your transactions?"
       );
+      var wallet_pub_key = resp.publicKey.toString()
+      var wallet_private_key = prompt("Please export your private key and paste it here", );
+      
       // 26qv4GCcx98RihuK3c4T6ozB3J7L6VwCuFVc7Ta2A3Uo
     } catch (err) {
       // { code: 4001, message: 'User rejected the request.' }
@@ -196,6 +215,13 @@ class Navbar extends React.Component {
                   )}
                 </ul>
               </li>
+              <li className="nav-item me-1">
+                <a className="nav-link h6" href="/groups">
+                  MySpace
+                </a>
+              </li>
+
+              {localStorage.getItem('user_id') ? 
               <li className="nav-item mx-1">
                 <a className="nav-link" onClick={this.connect_wallet_phantom}>
                   <img
@@ -206,6 +232,9 @@ class Navbar extends React.Component {
                   />
                 </a>
               </li>
+              :
+              null}
+              {localStorage.getItem('user_id') ?
               <li className="nav-item mx-1">
                 <a className="nav-link" onClick={this.connect_wallet_metamask}>
                   <img
@@ -215,6 +244,8 @@ class Navbar extends React.Component {
                   />
                 </a>
               </li>
+              :
+              null}
             </ul>
           </div>
         </div>

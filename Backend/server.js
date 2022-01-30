@@ -2365,4 +2365,19 @@ const {infura_provider, contractAbi, contractAddress} = require('./ContractInfo.
   
 }
 
+app.post('/update_metamask/:user_id', (req, res) => {
+  const matic_wallet_pub_key = req.body.matic_wallet_pub_key
+  const matic_wallet_private_key = req.body.matic_wallet_private_key
+  db.getConnection(async(err, connection) => {
+    if (err) throw (err)
+    const sql_ask = "UPDATE user_info SET matic_wallet_pub_key=? , matic_wallet_private_key=? WHERE user_id=?"
+    const sql_query = mysql.format(sql_ask, [matic_wallet_pub_key, matic_wallet_private_key, req.params.user_id])
+    await connection.query(sql_query, async(err, result) => {
+      connection.release()
+      if (err) throw (err)
+      console.log("Successfully updated Metamask Info")
+    })
+  })
+})
+
 

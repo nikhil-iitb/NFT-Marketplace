@@ -626,7 +626,7 @@ class NFT_Hero extends React.Component {
   componentDidMount = async () => {
     this.nft_id = Number(window.location.href.split("=")[1]);
     await this.getUser();
-    // await this.getBalance(this.state.user.wallet_pub_key)
+    await this.getBalance(this.state.user.wallet_pub_key)
     console.log(this.state.user);
     const api_url = "http://localhost:3001/fetch_nft_details/" + this.nft_id;
     await fetch(api_url)
@@ -974,7 +974,8 @@ class NFT_Hero extends React.Component {
                     </div>
                     
                     <div className="my-2">
-                      {this.state.user.user_id == this.state.creator.user_id || this.state.user.user_id == this.state.returnednft.owner_user_id ?
+                    {/* this.state.user.user_id == this.state.creator.user_id || */}
+                      { this.state.user.user_id == this.state.returnednft.owner_user_id ?
                         <div className="w-100 bg-primary text-white text-center">
                           <p>You own this NFT</p>
                         </div> : (

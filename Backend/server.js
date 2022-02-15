@@ -1935,6 +1935,7 @@ app.get("/purchase/:nft_id/:user_id_buyer/:user_id_seller/:user_id_creator", (re
                 royalty(data_buyer, data_seller, data_creator, data_nft.id)
               }
               else{
+                //verifies if hashes are equal 
               let keypair = verifyMintingSignature(data_nft, data_seller)
               if (keypair !== false) {
                 console.log("reached inside true bool")
@@ -1944,6 +1945,7 @@ app.get("/purchase/:nft_id/:user_id_buyer/:user_id_seller/:user_id_creator", (re
                   // console.log("after minting", res)
                 }
                 else{
+                  console.log("Reached to eth function")
                   let res = mintTokenEth(data_seller.matic_wallet_pub_key, data_seller.matic_wallet_private_key, data_nft.ipfs_url_metadata, data_buyer.matic_wallet_pub_key, data_nft.id, data_buyer.matic_wallet_private_key, data_nft.price, data_buyer.user_id)
                 }
               }
@@ -2283,6 +2285,8 @@ const {infura_provider, contractAbi, contractAddress} = require('./ContractInfo.
     },
     privateKey
   );
+  console.log("Reached inside mintTokenEth")
+
   const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
   console.log(`Transaction hash for minting: ${receipt.transactionHash}`);
   const tokenNum =  await myContract.methods.get().call();
